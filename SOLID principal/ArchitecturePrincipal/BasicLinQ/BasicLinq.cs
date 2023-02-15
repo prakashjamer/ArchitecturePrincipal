@@ -65,6 +65,8 @@ namespace BasicLinQ
                 Console.WriteLine($"Data received First Name {item.FirstName} , Last Name {item.LastName} ");
             }
         }
+        private void StashChanges()
+        { }
     }
 }
 
