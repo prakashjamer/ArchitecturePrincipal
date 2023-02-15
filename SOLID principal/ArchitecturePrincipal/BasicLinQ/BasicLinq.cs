@@ -67,6 +67,8 @@ namespace BasicLinQ
         }
         private void StashChanges()
         { }
+        private void MAsterChasnger()
+        { }
     }
 }
 
