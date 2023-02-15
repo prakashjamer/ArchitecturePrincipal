@@ -13,7 +13,11 @@ namespace BasicLinQ
     {
         private TestDBContext _dbContext;
         public BasicLinq()
+
+
         {
+            
+            /// child 1 
             _dbContext = new TestDBContext();
             //GetStudentDataIquerable();
             //linqGetEvenNumbers();
