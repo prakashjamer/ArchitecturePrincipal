@@ -26,6 +26,7 @@ namespace BasicLinQ
         }
         private void GetStudentDataIquerable()
         {
+            // Done directly  from github 2
             // Done directly  from github 1
             // Test CHILD 2 LOCAL REPO
             // Test CHILD 1 LOCAL REPO
