@@ -70,6 +70,9 @@ namespace BasicLinQ
         { }
         private void MAsterChasnger()
         { }
+
+        private void StashChangesDoneOnTestStash()
+        { }
         private void StashChanges1()
         { }
     }
