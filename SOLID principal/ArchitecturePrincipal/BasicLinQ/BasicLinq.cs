@@ -26,8 +26,9 @@ namespace BasicLinQ
         }
         private void GetStudentDataIquerable()
         {
-           // Test CHILD 1 LOCAL REPO
-            
+            // Test CHILD 2 LOCAL REPO
+            // Test CHILD 1 LOCAL REPO
+
             // _dbContext.Database.ExecuteSql("update tabl");
             IQueryable<Student> lst = from c in _dbContext.Students
                                       where c.FirstName == "prakash"
