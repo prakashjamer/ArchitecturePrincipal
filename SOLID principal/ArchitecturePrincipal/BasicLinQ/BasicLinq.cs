@@ -28,6 +28,7 @@ namespace BasicLinQ
         {
             // Done directly  from github 2
             // Done directly  from github 1
+            /// Test Child 2 LOC REPO change 3
             // Test CHILD 2 LOCAL REPO
             // Test CHILD 1 LOCAL REPO
 
@@ -64,6 +65,8 @@ namespace BasicLinQ
                 Console.WriteLine($"Data received First Name {item.FirstName} , Last Name {item.LastName} ");
             }
         }
+        private void StashChanges()
+        { }
     }
 }
 
