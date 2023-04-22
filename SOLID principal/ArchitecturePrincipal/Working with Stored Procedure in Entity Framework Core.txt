@@ -1,0 +1,106 @@
+Here, you will learn how to execute the database stored procedure in Entity Framework Core.
+
+EF Core provides the following methods to execute a stored procedure:
+
+DbSet<TEntity>.FromSql()
+DbContext.Database.ExecuteSqlCommand()
+
+
+Result must be an entity type. This means that a stored procedure must return all the columns of the corresponding table of an entity.
+Result cannot contain related data. This means that a stored procedure cannot perform JOINs to formulate the result.
+Insert, Update and Delete procedures cannot be mapped with the entity, so the SaveChanges method cannot call stored procedures for CUD operations.
+
+If you are following the code-first approach, then follow the below steps:
+
+PM> Add-migration sp-GetStudents
+
+public partial class spGetStudents : Migration
+{
+    protected override void Up(MigrationBuilder migrationBuilder)
+    {
+        var sp = @"CREATE PROCEDURE [dbo].[GetStudents]
+                    @FirstName varchar(50)
+                AS
+                BEGIN
+                    SET NOCOUNT ON;
+                    select * from Students where FirstName like @FirstName +'%'
+                END";
+
+        migrationBuilder.Sql(sp);
+    }
+
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+
+    }
+}
+
+
+PM> Update-database
+
+This will create the GetStudents stored procedure in the SQL Server database.
+
+
+You can execute SP using FromSql method in EF Core in the same way as above, as shown below.
+
+var context = new SchoolContext(); 
+
+var students = context.Students.FromSql("GetStudents 'Bill'").ToList();
+
+var name = "Bill";
+
+var context = new SchoolContext(); 
+var students = context.Students
+                      .FromSql($"GetStudents {name}")
+                      .ToList();
+
+var context = new SchoolContext(); 
+var param = new SqlParameter("@FirstName", "Bill");
+//or
+/*var param = new SqlParameter() {
+                    ParameterName = "@FirstName",
+                    SqlDbType =  System.Data.SqlDbType.VarChar,
+                    Direction = System.Data.ParameterDirection.Input,
+                    Size = 50,
+                    Value = "Bill"
+};*/
+
+
+var context = new SchoolContext(); 
+
+var list1 = context.Students.FromSql("GetStudents 'Bill'").ToList();
+var list2 = context.Students.FromSql("GetStudents 'Bill'").ToList();
+var list3 = context.Students.FromSql("GetStudents 'Bill'").ToList();
+
+
+
+Execute Stored Procedure using ExecuteSqlCommand()
+var context = new SchoolContext(); 
+
+var rowsAffected = context.Database.ExecuteSqlCommand("Update Students set FirstName = 'Bill' where StudentId = 1;");
+
+
+CREATE PROCEDURE CreateStudent
+    @FirstName Varchar(50),
+    @LastName Varchar(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    Insert into Students(
+           [FirstName]
+           ,[LastName]
+           )
+ Values (@FirstName, @LastName)
+END
+GO
+
+
+Now, you can execute the above SP as below.
+
+var context = new SchoolContext(); 
+
+context.Database.ExecuteSqlCommand("CreateStudents @p0, @p1", parameters: new[] { "Bill", "Gates" });
+
+
+
+

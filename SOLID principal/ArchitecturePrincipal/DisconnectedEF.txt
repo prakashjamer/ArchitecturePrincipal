@@ -1,0 +1,184 @@
+ disconnected entities (entities which are not being tracked by the DbContext) 
+ need to be attached to the DbContext with an appropriate EntityState. For example, 
+ Added state for new entities, Modified state for the edited entities and 
+ Deleted state for the deleted entities, which will result in an 
+ INSERT, UPDATE, or DELETE command in the database when the SaveChanges() method is called.
+ 1. Attach an entity to DbContext with an appropriate EntityState e.g. Added, Modified, or Deleted
+2. Call SaveChanges() method
+
+//Disconnected entity
+var std = new Student(){ Name = "Bill" };
+
+using (var context = new SchoolContext())
+{
+    //1. Attach an entity to context with Added EntityState
+    context.Add<Student>(std);
+    
+    //or the followings are also valid
+    // context.Students.Add(std);
+    // context.Entry<Student>(std).State = EntityState.Added;
+    // context.Attach<Student>(std);
+                  
+    //2. Calling SaveChanges to insert a new record into Students table
+    context.SaveChanges();
+}
+
+
+
+DbContext Methods	DbSet Methods	Description
+DbContext.Attach	DbSet.Attach	Attach an entity to DbContext. Set Unchanged state for an entity whose Key property has a value and Added state for an entity whose Key property is empty or the default value of data type.
+DbContext.Add	DbSet.Add	Attach an entity to DbContext with Added state.
+DbContext.AddRange	DbSet.AddRange	Attach a collection of entities to DbContext with Added state.
+DbContext.Entry	-	Gets an EntityEntry for the specified entity which provides access to change tracking information and operations.
+DbContext.AddAsync	DbSet.AddAsync	Asynchronous method for attaching an entity to DbContext with Added state and start tracking it if not. Data will be inserted into the database when SaveChangesAsync() is called.
+DbContext.AddRangeAsync	DbSet.AddRangeAsync	Asynchronous method for attaching multiple entities to DbContext with Added state in one go and start tracking them if not. Data will be inserted into the 
+
+
+---------------------------------- UPDATE -----------------------------------------------------------------------------
+
+var stud = new Student(){ StudentId = 1, Name = "Bill" };
+
+stud.Name = "Steve"; 
+
+using (var context = new SchoolContext())
+{
+    context.Update<Student>(stud);
+
+    // or the followings are also valid
+    // context.Students.Update(stud);
+    // context.Attach<Student>(stud).State = EntityState.Modified;
+    // context.Entry<Student>(stud).State = EntityState.Modified; 
+
+    context.SaveChanges(); 
+}
+------------------------------------END UPDATE -----------------------------------------------------------------------------
+Update Multiple Entities
+var modifiedStudent1 = new Student()
+{
+    StudentId = 1,
+    Name = "Bill"
+};
+
+var modifiedStudent2 = new Student()
+{
+    StudentId = 3,
+    Name = "Steve"
+};
+
+var modifiedStudent3 = new Student()
+{
+    StudentId = 3,
+    Name = "James"
+};
+
+IList<Student> modifiedStudents = new List<Student>()
+{
+    modifiedStudent1,
+    modifiedStudent2,
+    modifiedStudent3
+};
+
+using (var context = new SchoolContext())
+{
+    context.UpdateRange(modifiedStudents);
+    
+    // or the followings are also valid
+    //context.UpdateRange(modifiedStudent1, modifiedStudent2, modifiedStudent3);
+    //context.Students.UpdateRange(modifiedStudents);
+    //context.Students.UpdateRange(modifiedStudent1, modifiedStudent2, modifiedStudent3);
+                
+    context.SaveChanges();
+}
+
+------------------------------------END UPDATE -----------------------------------------------------------------------------
+
+
+
+// entity to be deleted
+var student = new Student() {
+        StudentId = 1
+};
+
+using (var context = new SchoolContext()) 
+{
+    context.Remove<Student>(student);
+   
+    // or the followings are also valid
+    // context.RemoveRange(student);
+    //context.Students.Remove(student);
+    //context.Students.RemoveRange(student);
+    //context.Attach<Student>(student).State = EntityState.Deleted;
+    //context.Entry<Student>(student).State = EntityState.Deleted;
+    
+    context.SaveChanges();
+}
+
+
+------------------------------------END DELETE -----------------------------------------------------------------------------
+
+
+Delete Related Data
+If an entity has relationship with other entities such as one-to-one or one-to-many then deleting
+related data when the root entity is deleted is depends on how the relationship is configured.
+
+For example, consider that the Student and Grade entities have a one-to-many relationship. 
+There will be many student records for a particular GradeId. EF will throw a reference integrity error 
+if we try to delete a grade which has related Students records in the database. 
+To solve this issue, you can define the referential constraint action options using Fluent API.
+For example, you can configure a cascade delete option for the relationship, as shown below.
+
+
+modelBuilder.Entity<Student>()
+    .HasOne<Grade>(s => s.Grade)
+    .WithMany(g => g.Students)
+    .HasForeignKey(s => s.GradeId)
+    .OnDelete(DeleteBehavior.Cascade);
+
+    -------------------------- SET DEFAULT PROP 
+public class SchoolContext : DbContext
+{
+    public SchoolContext() : base()
+    {
+
+    }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder) {
+        modelBuilder.Entity<Student>().Property<DateTime>("CreatedDate");
+        modelBuilder.Entity<Student>().Property<DateTime>("UpdatedDate");
+    }
+
+    public DbSet<Student> Students { get; set; }
+}
+
+    public override int SaveChanges()
+{
+    var entries = ChangeTracker
+        .Entries()
+        .Where(e =>
+                e.State == EntityState.Added
+                || e.State == EntityState.Modified);
+
+    foreach (var entityEntry in entries)
+    {
+        entityEntry.Property("UpdatedDate").CurrentValue = DateTime.Now;
+
+        if (entityEntry.State == EntityState.Added)
+        {
+            entityEntry.Property("CreatedDate").CurrentValue = DateTime.Now;
+        }
+    }
+
+    return base.SaveChanges();
+}
+--------------------Configuring Shadow Properties on All Entities-------------------------------
+
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    var allEntities = modelBuilder.Model.GetEntityTypes();
+
+    foreach (var entity in allEntities)
+    {
+        entity.AddProperty("CreatedDate",typeof(DateTime));
+        entity.AddProperty("UpdatedDate",typeof(DateTime));
+    }
+}

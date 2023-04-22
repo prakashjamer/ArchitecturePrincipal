@@ -1,0 +1,5 @@
+﻿add-migration CreateDB
+Update-database CreateDB
+script-migration
+
+remove-migration

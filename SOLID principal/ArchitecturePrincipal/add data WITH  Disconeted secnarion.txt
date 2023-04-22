@@ -1,0 +1,55 @@
+///// 
+https://www.entityframeworktutorial.net/efcore/working-with-disconnected-entity-graph-ef-core.aspx
+
+public static void Main()
+{
+    var stud = new Student() { //Root entity (empty key)
+        Name = "Bill",
+        Address = new StudentAddress()  //Child entity (with key value)
+        {
+            StudentAddressId = 1,
+            City = "Seattle",
+            Country = "USA"
+        },
+        StudentCourses = new List<StudentCourse>() {
+            new StudentCourse(){  Course = new Course(){ CourseName = "Machine Language" } },//Child entity (empty key)
+            new StudentCourse(){  Course = new Course(){  CourseId = 2 } } //Child entity (with key value)
+        }
+    };
+
+    var context = new SchoolContext();
+    context.Attach(stud).State = EntityState.Added;  
+
+    DisplayStates(context.ChangeTracker.Entries());
+}
+
+private static void DisplayStates(IEnumerable<EntityEntry> entries)
+{
+    foreach (var entry in entries)
+    {
+        Console.WriteLine($"Entity: {entry.Entity.GetType().Name},
+                             State: {entry.State.ToString()} ");
+    }
+}
+
+O/P 
+Entity: Student, State: Added
+Entity: StudentAddress, State: Unchanged
+Entity: StudentCourse, State: Added
+Entity: Course, State: Added
+Entity: StudentCourse, State: Added
+Entity: Course, State: Unchanged
+
+
+
+In the above example, stud is an instance of the Student entity graph which includes references of StudentAddress and StudentCourse entities. context.Attach(stud).State = EntityState.Added attaches the stud entity graph to a context and sets Added state to it.
+
+The Attach() method sets Added EntityState to the root entity (in this case Student) irrespective of whether it contains the Key value or not. If a child entity contains the key value, then it will be marked as Unchanged, otherwise it will be marked as Added. The output of the above example shows that the Student entity has Added EntityState, the child entities with non-empty key values have Unchanged EntityState and the ones with empty key values have Added state.
+
+The following table lists the behaviour of the Attach() method when setting a different EntityState to a disconnected entity graph.
+
+
+Attach()	Root entity with Key value	Root Entity with Empty or CLR default value	Child Entity with Key value	Child Entity with empty or CLR default value
+context.Attach(entityGraph).State = EntityState.Added	Added	Added	Unchanged	Added
+context.Attach(entityGraph).State = EntityState.Modified	Modified	Exception	Unchanged	Added
+context.Attach(entityGraph).State = EntityState.Deleted	Deleted	Exception	Unchanged	Added

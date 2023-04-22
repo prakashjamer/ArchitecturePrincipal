@@ -1,0 +1,32 @@
+Entity Framework Core provides the DbSet.FromSql() method to execute raw SQL queries for the underlying database and get the results as entity objects.
+
+The following example demonstrates executing a raw SQL query to MS SQL Server database.
+
+var context = new SchoolContext();
+
+var students = context.Students
+                  .FromSql("Select * from Students where Name = 'Bill'")
+                  .ToList();
+
+
+In the above example, the FromSql() method is used after the Students entity set (DbSet<Student>), 
+so the specified SQL query must return records from the Students table which will transform 
+in Student entities. Entity Framework Core will execute the specified query to the database 
+i.e. Select * from Students where Name = 'Bill' in the above example.
+
+
+string name = "Bill";
+
+var context = new SchoolContext();
+var students = context.Students
+                    .FromSql($"Select * from Students where Name = '{name}'")
+                    .ToList();
+
+string name = "Bill";
+
+var context = new SchoolContext();
+var students = context.Students
+                    .FromSql("Select * from Students where Name = '{0}'", name)
+                    .OrderBy(s => s.StudentId)
+                    .ToList();
+
