@@ -1,0 +1,11 @@
+﻿serilog.aspnetcore
+Serilog.Settings.Configuration
+Serilog.Sinks.MSSqlServer
+Serilog.Enrichers.Environment
+Serilog.Enrichers.Thread
+Serilog.Enrichers.Process
+
+IMPACT 
+<PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />
+    <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="6.3.0" />

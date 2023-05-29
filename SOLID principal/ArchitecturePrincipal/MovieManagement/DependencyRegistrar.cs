@@ -1,4 +1,8 @@
-﻿using MovieManagement.Filters;
+﻿using MovieManagement.DataAccess.Repository;
+using MovieManagement.Filters;
+using MovieManagementBusiness.Interface;
+using MovieManagementBusiness.Services;
+using MovieManagementDomain.Interface.Repository;
 using Newtonsoft.Json.Serialization;
 using System.Text.Json;
 
@@ -35,6 +39,22 @@ namespace MovieManagement
 
 
             return services;
+        }
+
+        public static IServiceCollection AddDomainDepedency(this IServiceCollection services)
+        {
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IMovieRepository, MovieRepository>();
+            services.AddScoped<IActorRepository, ActorRepository>();
+
+            return services;
+
+        }
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services)
+        {
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            return services;
+
         }
     }
 }

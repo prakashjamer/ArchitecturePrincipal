@@ -2,14 +2,21 @@ using Microsoft.EntityFrameworkCore;
 using MovieManagement;
 using MovieManagement.DataAccess.Context;
 using MovieManagement.DataAccess.Repository;
+using MovieManagement.Helper;
+using MovieManagementBusiness;
 using MovieManagementDomain.Interface.Repository;
+using Serilog;
 using System;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
+IConfiguration config = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .AddEnvironmentVariables()
+    .Build();
+// Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -21,7 +28,12 @@ option.UseSqlServer(builder.Configuration.GetConnectionString("MovieConnection")
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddMvc().
     AddJsonOptions(c => c.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-builder.Services.AddCustomMvc();
+builder.Services.AddCustomMvc().AddDomainDepedency().AddBusinessDepedency().AddAutoMapper(typeof(AutoMapperProfile));
+Log.Logger = new LoggerConfiguration().CreateBootstrapLogger();
+builder.Host.UseSerilog(((ctx, lc) => lc
+.ReadFrom.Configuration(ctx.Configuration)));
+
+
 var app = builder.Build();
 /// code to  run migration 
 using (var scope = app.Services.CreateScope())
@@ -32,14 +44,18 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    //app.UseSwagger();
+    //app.UseSwaggerUI();
 }
-
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+//app.UseRouting();
 
+app.UseSerilogRequestLogging();
+Log.Information($"Application Start.... {System.DateTime.Now.ToString("dd mm yyyy")}");
 app.Run();

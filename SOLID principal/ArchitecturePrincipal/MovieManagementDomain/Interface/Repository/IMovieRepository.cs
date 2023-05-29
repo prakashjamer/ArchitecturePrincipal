@@ -9,5 +9,6 @@ namespace MovieManagementDomain.Interface.Repository
 {
     public interface IMovieRepository:IGenericRepository<Movie>
     {
+        IQueryable<Movie> GetAllMovies();
     }
 }
