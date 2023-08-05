@@ -51,7 +51,6 @@ namespace MovieManagement.Controllers
                 var jsonData = JsonConvert.SerializeObject(result);
                 await distributedCache.SetStringAsync("MovieData", jsonData, distributioncacheOption);
                 //var result=await  UnitOfWork.MovieRepo.GetAll().ToListAsync();
-                // made changes 
                 return Ok(result);
             }
             else
